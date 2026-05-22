@@ -13,11 +13,80 @@ const fadeUp = (delay = 0) => ({
 const Contact = () => {
   const { personalInfo } = portfolioData;
   const [submitted, setSubmitted] = useState(false);
+  const [statusMsg, setStatusMsg] = useState('✓ Message Sent Successfully');
+  const [isError, setIsError] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  // Form state
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+
+  const checkRateLimit = () => {
+    const now = Date.now();
+    const storedReqs = JSON.parse(localStorage.getItem('contact_reqs') || '[]');
+    // Keep requests from the last 60 seconds
+    const recentReqs = storedReqs.filter(time => now - time < 60000);
+    
+    if (recentReqs.length >= 3) {
+      return false; // Rate limited
+    }
+    
+    recentReqs.push(now);
+    localStorage.setItem('contact_reqs', JSON.stringify(recentReqs));
+    return true;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 3000);
+    
+    if (!checkRateLimit()) {
+      setStatusMsg('Too many requests. Please wait a minute.');
+      setIsError(true);
+      setSubmitted(true);
+      setTimeout(() => setSubmitted(false), 3000);
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const res = await fetch('/api/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          message,
+          toEmail: personalInfo.email
+        })
+      });
+
+      if (res.ok) {
+        setStatusMsg('✓ Message Sent Successfully');
+        setIsError(false);
+        setName('');
+        setEmail('');
+        setMessage('');
+        // Show popup window as requested
+        window.alert('Message sent successfully! I will get back to you soon.');
+      } else {
+        const errorData = await res.json();
+        console.error(errorData);
+        setStatusMsg('Failed to send message.');
+        setIsError(true);
+      }
+    } catch (err) {
+      console.error(err);
+      setStatusMsg('Error connecting to server.');
+      setIsError(true);
+    } finally {
+      setIsSubmitting(false);
+      setSubmitted(true);
+      setTimeout(() => setSubmitted(false), 4000);
+    }
   };
 
   return (
@@ -63,19 +132,19 @@ const Contact = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-[0.72rem] font-mono text-text-muted mb-1.5 tracking-[0.06em]">NAME</label>
-                  <input required type="text" className="w-full bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.07)] rounded-[8px] px-[0.9rem] py-[0.65rem] text-text-main text-[0.88rem] focus:outline-none focus:border-accent-primary focus:bg-[rgba(99,102,241,0.04)] transition-all" placeholder="Your name" />
+                  <input required minLength={2} maxLength={50} type="text" value={name} onChange={e => setName(e.target.value)} className="w-full bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.07)] rounded-[8px] px-[0.9rem] py-[0.65rem] text-text-main text-[0.88rem] focus:outline-none focus:border-accent-primary focus:bg-[rgba(99,102,241,0.04)] transition-all" placeholder="Your name" />
                 </div>
                 <div>
                   <label className="block text-[0.72rem] font-mono text-text-muted mb-1.5 tracking-[0.06em]">EMAIL</label>
-                  <input required type="email" className="w-full bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.07)] rounded-[8px] px-[0.9rem] py-[0.65rem] text-text-main text-[0.88rem] focus:outline-none focus:border-accent-primary focus:bg-[rgba(99,102,241,0.04)] transition-all" placeholder="you@domain.com" />
+                  <input required type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.07)] rounded-[8px] px-[0.9rem] py-[0.65rem] text-text-main text-[0.88rem] focus:outline-none focus:border-accent-primary focus:bg-[rgba(99,102,241,0.04)] transition-all" placeholder="you@domain.com" />
                 </div>
               </div>
               <div className="mb-4">
                 <label className="block text-[0.72rem] font-mono text-text-muted mb-1.5 tracking-[0.06em]">MESSAGE</label>
-                <textarea required className="w-full bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.07)] rounded-[8px] px-[0.9rem] py-[0.65rem] text-text-main text-[0.88rem] focus:outline-none focus:border-accent-primary focus:bg-[rgba(99,102,241,0.04)] transition-all min-h-[110px] resize-y" placeholder="Tell me about your project..."></textarea>
+                <textarea required minLength={10} maxLength={500} value={message} onChange={e => setMessage(e.target.value)} className="w-full bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.07)] rounded-[8px] px-[0.9rem] py-[0.65rem] text-text-main text-[0.88rem] focus:outline-none focus:border-accent-primary focus:bg-[rgba(99,102,241,0.04)] transition-all min-h-[110px] resize-y" placeholder="Tell me about your project..."></textarea>
               </div>
-              <button type="submit" className="w-full py-[0.7rem] bg-accent-primary text-white rounded-[8px] font-bold text-[0.88rem] transition-all hover:bg-accent-secondary hover:-translate-y-[2px] hover:shadow-[0_8px_24px_rgba(99,102,241,0.35)]">
-                Send Message
+              <button disabled={isSubmitting} type="submit" className="w-full py-[0.7rem] bg-accent-primary text-white rounded-[8px] font-bold text-[0.88rem] transition-all hover:bg-accent-secondary hover:-translate-y-[2px] disabled:opacity-50 disabled:cursor-not-allowed">
+                {isSubmitting ? 'Sending...' : 'Send Message'}
               </button>
             </form>
           </div>
@@ -84,8 +153,8 @@ const Contact = () => {
       </div>
 
       {/* Toast */}
-      <div className={`fixed bottom-8 right-8 bg-card-primary border border-[rgba(52,211,153,0.3)] rounded-[10px] px-[1.4rem] py-[0.9rem] text-[0.85rem] text-accent-green flex items-center gap-2 z-[9999] transition-all duration-300 ${submitted ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0 pointer-events-none'}`}>
-        <span>✓ Message Sent Successfully</span>
+      <div className={`fixed bottom-8 right-8 bg-card-primary border ${isError ? 'border-red-500 text-red-500' : 'border-[rgba(52,211,153,0.3)] text-accent-green'} rounded-[10px] px-[1.4rem] py-[0.9rem] text-[0.85rem] flex items-center gap-2 z-[9999] transition-all duration-300 ${submitted ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0 pointer-events-none'}`}>
+        <span>{statusMsg}</span>
       </div>
 
     </section>

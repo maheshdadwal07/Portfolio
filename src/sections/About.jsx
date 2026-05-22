@@ -52,7 +52,7 @@ const About = () => {
               <h3 className="text-white font-bold text-3xl mb-1">{portfolioData.about.stats.projectsCompleted}+</h3>
               <p className="text-slate-400 text-sm">Projects Completed</p>
             </div>
-            
+
             <div className="glass-card p-6 rounded-2xl flex flex-col items-center text-center hover:-translate-y-2 transition-transform duration-300">
               <div className="w-12 h-12 bg-cyan-500/20 text-cyan-400 rounded-xl flex items-center justify-center mb-4">
                 <Code2 className="w-6 h-6" />
@@ -60,7 +60,7 @@ const About = () => {
               <h3 className="text-white font-bold text-3xl mb-1">{portfolioData.about.stats.technologiesUsed}+</h3>
               <p className="text-slate-400 text-sm">Technologies Used</p>
             </div>
-            
+
             <div className="glass-card p-6 rounded-2xl flex flex-col items-center text-center hover:-translate-y-2 transition-transform duration-300 sm:col-span-2">
               <div className="w-12 h-12 bg-purple-500/20 text-purple-400 rounded-xl flex items-center justify-center mb-4">
                 <Database className="w-6 h-6" />

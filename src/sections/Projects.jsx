@@ -1,173 +1,115 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { portfolioData } from '../data/portfolioData';
-import { ExternalLink, Github, X } from 'lucide-react';
 
-const ProjectModal = ({ project, onClose }) => {
-  if (!project) return null;
-
-  return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm"
-      >
-        <motion.div
-          initial={{ opacity: 0, y: 50, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 20, scale: 0.95 }}
-          onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto glass-card rounded-2xl shadow-2xl"
-        >
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 bg-slate-800/50 hover:bg-slate-700 text-slate-300 rounded-full transition-colors z-10"
-          >
-            <X className="w-5 h-5" />
-          </button>
-          
-          <div className="p-6 sm:p-8">
-            <h2 className="text-3xl font-bold text-white mb-2">{project.title}</h2>
-            <p className="text-indigo-400 text-lg mb-6">{project.tagline}</p>
-            
-            <div className="flex flex-wrap gap-2 mb-8">
-              {project.techStack.map((tech, idx) => (
-                <span key={idx} className="px-3 py-1 bg-indigo-500/10 text-indigo-300 text-sm rounded-full border border-indigo-500/20">
-                  {tech}
-                </span>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-3">About</h3>
-                <p className="text-slate-300 leading-relaxed">{project.description}</p>
-                
-                <h3 className="text-xl font-semibold text-white mb-3 mt-6">Challenges Solved</h3>
-                <p className="text-slate-300 leading-relaxed">{project.challenges}</p>
-              </div>
-              
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-3">Key Features</h3>
-                <ul className="space-y-2 text-slate-300">
-                  {project.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start">
-                      <span className="text-indigo-500 mr-2 mt-1">•</span>
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            <div className="border-t border-slate-800 pt-6 flex flex-wrap gap-4">
-              <a
-                href={project.liveLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
-              >
-                <ExternalLink className="w-4 h-4" /> Live Demo
-              </a>
-              <a
-                href={project.githubLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 rounded-lg font-medium transition-colors"
-              >
-                <Github className="w-4 h-4" /> Source Code
-              </a>
-            </div>
-          </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
-  );
-};
-
-const ProjectCard = ({ project, onClick, index }) => {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      className="glass-card rounded-2xl overflow-hidden group cursor-pointer hover:border-indigo-500/50 transition-all duration-300"
-      onClick={() => onClick(project)}
-    >
-      <div className="relative h-48 overflow-hidden">
-        <div className="absolute inset-0 bg-slate-900/20 group-hover:bg-transparent transition-colors z-10" />
-        <img 
-          src={project.image} 
-          alt={project.title} 
-          className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
-        />
-      </div>
-      <div className="p-6">
-        <h3 className="text-xl font-bold text-white mb-1 group-hover:text-indigo-400 transition-colors">{project.title}</h3>
-        <p className="text-slate-400 text-sm mb-4 line-clamp-2">{project.description}</p>
-        <div className="flex flex-wrap gap-2 mb-6">
-          {project.techStack.slice(0, 3).map((tech, idx) => (
-            <span key={idx} className="text-xs px-2 py-1 bg-slate-800 text-slate-300 rounded">
-              {tech}
-            </span>
-          ))}
-          {project.techStack.length > 3 && (
-            <span className="text-xs px-2 py-1 bg-slate-800 text-slate-400 rounded">
-              +{project.techStack.length - 3}
-            </span>
-          )}
-        </div>
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-indigo-400 font-medium">View Details &rarr;</span>
-          <div className="flex gap-3 text-slate-400">
-            {project.githubLink && <Github className="w-4 h-4 hover:text-white transition-colors" />}
-            {project.liveLink && <ExternalLink className="w-4 h-4 hover:text-white transition-colors" />}
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
-};
+const fadeUp = (delay = 0) => ({
+  initial: { opacity: 0, y: 30 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true },
+  transition: { duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] },
+});
 
 const Projects = () => {
-  const [selectedProject, setSelectedProject] = useState(null);
-
+  const [filter, setFilter] = useState('all');
+  
   return (
-    <section id="projects" className="py-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="mb-16"
-        >
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Featured Projects</h2>
-          <div className="w-20 h-1 bg-indigo-500 rounded" />
-          <p className="mt-4 text-slate-400 max-w-2xl">
-            A selection of my recent work. Click on any project to see more details, features, and links.
+    <section id="projects" className="py-28 relative z-10 w-full">
+      <div className="max-w-[1160px] mx-auto px-8 w-full">
+        <motion.div {...fadeUp(0)}>
+          <div className="section-label">Featured Work</div>
+          <h2 className="text-[clamp(1.8rem,3vw,2.5rem)] font-extrabold leading-[1.1] tracking-[-0.03em] mb-[0.6rem]">
+            Projects that<br />ship to production
+          </h2>
+          <p className="text-[0.95rem] text-text-muted max-w-[480px] mb-10">
+            End-to-end applications built with real architecture decisions, auth systems, and deployment pipelines.
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {portfolioData.projects.map((project, index) => (
-            <ProjectCard 
-              key={project.id} 
-              project={project} 
-              index={index} 
-              onClick={setSelectedProject} 
-            />
+        <motion.div {...fadeUp(0.1)} className="flex flex-wrap gap-2 mb-12">
+          {['all', 'fullstack', 'frontend', 'backend'].map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-4 py-1.5 border rounded-full text-[0.78rem] transition-all font-syne capitalize ${
+                filter === f 
+                  ? 'bg-[rgba(99,102,241,0.12)] border-accent-primary text-accent-secondary'
+                  : 'bg-transparent border-[rgba(255,255,255,0.07)] text-text-muted hover:bg-[rgba(99,102,241,0.12)] hover:border-accent-primary hover:text-accent-secondary'
+              }`}
+            >
+              {f === 'all' ? 'All' : f === 'api' ? 'API / Backend' : f}
+            </button>
           ))}
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <AnimatePresence>
+            {portfolioData.projects.map((project, i) => (
+              <motion.div
+                key={project.id}
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.3 }}
+                className="bg-card-primary border border-[rgba(255,255,255,0.07)] rounded-[16px] overflow-hidden cursor-pointer transition-all hover:border-[rgba(99,102,241,0.3)] hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(0,0,0,0.4)] relative group"
+              >
+                <div className="absolute inset-0 rounded-[16px] bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.06),transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-0"></div>
+                
+                {/* Mock Visual (Instead of real image for the cyber look) */}
+                <div className="h-[180px] bg-gradient-to-br from-[#0a1628] to-[#0d2044] relative overflow-hidden flex items-center justify-center z-10">
+                  <div className="w-[85%] h-[80%] bg-[rgba(5,8,22,0.8)] border border-[rgba(255,255,255,0.07)] rounded-[10px] flex flex-col overflow-hidden">
+                    <div className="h-[26px] bg-[rgba(255,255,255,0.03)] border-b border-[rgba(255,255,255,0.07)] flex items-center px-2.5 gap-1.5">
+                      <div className="w-[7px] h-[7px] rounded-full bg-[#f87171]"></div>
+                      <div className="w-[7px] h-[7px] rounded-full bg-[#fbbf24]"></div>
+                      <div className="w-[7px] h-[7px] rounded-full bg-[#34d399]"></div>
+                      <span className="text-[0.58rem] text-text-muted ml-1.5 font-mono">app.live.com</span>
+                    </div>
+                    <div className="flex-1 grid grid-cols-[2fr_1fr] gap-1.5 p-2">
+                       <div className="flex flex-col gap-1.5">
+                          <div className="bg-[rgba(99,102,241,0.18)] rounded-[4px] flex-1 max-h-[30px]"></div>
+                          <div className="bg-[rgba(99,102,241,0.07)] rounded-[4px] flex-1 max-h-[20px]"></div>
+                       </div>
+                       <div className="flex flex-col gap-1.5">
+                          <div className="bg-[rgba(99,102,241,0.07)] rounded-[4px] flex-1 max-h-[25px]"></div>
+                          <div className="bg-[rgba(99,102,241,0.18)] rounded-[4px] flex-1 max-h-[60px]"></div>
+                       </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-5 relative z-10">
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <div className="text-[1rem] font-bold tracking-[-0.02em]">{project.title}</div>
+                      <div className="inline-block text-[0.62rem] font-mono text-accent-secondary bg-[rgba(99,102,241,0.1)] px-2 py-0.5 rounded-full mt-1">
+                        Full Stack
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-[0.8rem] text-text-muted mb-3 line-clamp-2 leading-[1.5]">
+                    {project.description}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5 mb-4">
+                    {project.techStack.map((tech, idx) => (
+                      <span key={idx} className="text-[0.65rem] font-mono px-2 py-0.5 rounded-[4px] bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.07)] text-text-muted">
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <a href={project.liveLink} target="_blank" rel="noopener noreferrer" className="flex-1 text-center py-2 rounded-[7px] text-[0.75rem] font-semibold transition-all bg-accent-primary text-white hover:bg-accent-secondary">
+                      Live Demo
+                    </a>
+                    <a href={project.githubLink} target="_blank" rel="noopener noreferrer" className="flex-1 text-center py-2 rounded-[7px] text-[0.75rem] font-semibold transition-all border border-[rgba(255,255,255,0.07)] text-text-muted hover:border-accent-primary hover:text-accent-secondary">
+                      GitHub
+                    </a>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
       </div>
-
-      {selectedProject && (
-        <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />
-      )}
     </section>
   );
 };
